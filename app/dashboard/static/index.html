@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Telemetry Playground</title>
+    </head>
+
+    <body>
+        <h1>Telemetry Playground</h1>
+
+        <h2>Generator</h2>
+
+        <select id="generator">
+            <option value="generator-1">generator-1</option>
+
+            <option value="generator-2">generator-2</option>
+
+            <option value="generator-3">generator-3</option>
+        </select>
+
+        <select id="mode">
+            <option>stable</option>
+            <option>random</option>
+            <option>burst</option>
+            <option>silent</option>
+        </select>
+
+        <input id="rate" type="number" value="10" />
+
+        <label>
+            Malformed
+            <input type="checkbox" id="malformed" />
+        </label>
+
+        <input id="latency" type="number" value="0" />
+
+        <button onclick="update()">Apply</button>
+
+        <script>
+            async function update() {
+                const generator = document.getElementById("generator").value;
+
+                await fetch(`/generator/${generator}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        mode: document.getElementById("mode").value,
+                        rate: parseInt(document.getElementById("rate").value),
+                        malformed: document.getElementById("malformed").checked,
+                        latency_ms: parseInt(
+                            document.getElementById("latency").value,
+                        ),
+                    }),
+                });
+
+                alert(`${generator} updated`);
+            }
+        </script>
+    </body>
+</html>

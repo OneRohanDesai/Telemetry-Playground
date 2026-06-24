@@ -1,0 +1,95 @@
+services:
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/dashboard/Dockerfile
+
+    container_name: dashboard
+
+    depends_on:
+      - redis
+
+    ports:
+      - "8000:8000"
+
+  receiver-1:
+    build:
+      context: .
+      dockerfile: docker/receiver/Dockerfile
+
+    container_name: receiver-1
+
+  receiver-2:
+    build:
+      context: .
+      dockerfile: docker/receiver/Dockerfile
+
+    container_name: receiver-2
+
+  receiver-3:
+    build:
+      context: .
+      dockerfile: docker/receiver/Dockerfile
+
+    container_name: receiver-3
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+
+    container_name: nginx
+
+    depends_on:
+      - receiver-1
+      - receiver-2
+      - receiver-3
+
+    ports:
+      - "8080:80"
+
+  generator-1:
+    build:
+      context: .
+      dockerfile: docker/generator/Dockerfile
+
+    container_name: generator-1
+
+    environment:
+      GENERATOR_NAME: generator-1
+
+    depends_on:
+      - redis
+      - nginx
+
+  generator-2:
+    build:
+      context: .
+      dockerfile: docker/generator/Dockerfile
+
+    container_name: generator-2
+
+    environment:
+      GENERATOR_NAME: generator-2
+
+    depends_on:
+      - redis
+      - nginx
+
+  generator-3:
+    build:
+      context: .
+      dockerfile: docker/generator/Dockerfile
+
+    container_name: generator-3
+
+    environment:
+      GENERATOR_NAME: generator-3
+
+    depends_on:
+      - redis
+      - nginx
