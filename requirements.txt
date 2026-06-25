@@ -3,3 +3,4 @@ uvicorn
 redis
 httpx
 pydantic
+prometheus-client==0.23.1
