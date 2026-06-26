@@ -10,13 +10,16 @@ from app.common.metrics import (
 )
 from app.common.models import create_packet
 from app.common.redis_client import get_config
+from app.common.telemetry import setup_telemetry
 from fastapi import FastAPI, Response
+from opentelemetry.trace import Status, StatusCode
 from prometheus_client import (
     CONTENT_TYPE_LATEST,
     generate_latest,
 )
 
 app = FastAPI()
+tracer = setup_telemetry("generator")
 
 GENERATOR_NAME = os.getenv(
     "GENERATOR_NAME",
@@ -58,14 +61,25 @@ async def worker():
                 1,
             )
 
-            packet = create_packet(
-                source=GENERATOR_NAME,
-                destination="receiver-service",
-                sequence=sequence,
-                mode=mode,
-            )
+            with tracer.start_as_current_span("generate_packet") as span:
+                packet = create_packet(
+                    source=GENERATOR_NAME,
+                    destination="receiver-service",
+                    sequence=sequence,
+                    mode=mode,
+                )
 
-            data = packet.model_dump()
+                span.set_attribute("packet.id", packet.packet_id)
+                span.set_attribute("packet.source", packet.source)
+                span.set_attribute("packet.destination", packet.destination)
+                span.set_attribute("packet.sequence", packet.sequence)
+                span.set_attribute("packet.mode", packet.traffic_mode)
+                span.set_attribute("packet.size_bytes", packet.size_bytes)
+                span.set_attribute("generator.name", GENERATOR_NAME)
+
+                span.add_event("packet_created")
+
+                data = packet.model_dump()
 
             if config["malformed"]:
                 data.pop(
@@ -78,15 +92,37 @@ async def worker():
             try:
                 ACTIVE_REQUESTS.inc()
 
-                await client.post(
-                    "http://nginx/receive",
-                    json=data,
-                )
+                with tracer.start_as_current_span("http_send") as span:
+                    span.set_attribute(
+                        "http.method",
+                        "POST",
+                    )
+
+                    span.set_attribute(
+                        "http.url",
+                        "http://nginx/receive",
+                    )
+
+                    response = await client.post(
+                        "http://nginx/receive",
+                        json=data,
+                    )
+
+                    span.set_attribute(
+                        "http.status_code",
+                        response.status_code,
+                    )
+
+                    span.add_event("response_received")
 
                 PACKETS_SENT.labels(generator=GENERATOR_NAME).inc()
 
-            except Exception:
-                pass
+            except Exception as e:
+                span.record_exception(e)
+
+                span.set_status(Status(StatusCode.ERROR))
+
+                raise
 
             finally:
                 try:
