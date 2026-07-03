@@ -1,10 +1,10 @@
 namespace: telemetry
 
 image:
-  generator: ghcr.io/OneRohanDesai/telemetry-generator
-  receiver: ghcr.io/OneRohanDesai/telemetry-receiver
-  dashboard: ghcr.io/OneRohanDesai/telemetry-dashboard
-  nginx: ghcr.io/OneRohanDesai/telemetry-nginx
+  generator: ghcr.io/onerohandesai/telemetry-generator
+  receiver: ghcr.io/onerohandesai/telemetry-receiver
+  dashboard: ghcr.io/onerohandesai/telemetry-dashboard
+  nginx: ghcr.io/onerohandesai/telemetry-nginx
   redis: redis:7-alpine
 
 imageTag: main

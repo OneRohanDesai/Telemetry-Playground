@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -40,8 +42,8 @@ jobs:
           file: docker/generator/Dockerfile
           push: true
           tags: |
-            ghcr.io/OneRohanDesai/telemetry-generator:${{ env.IMAGE_TAG }}
-            ghcr.io/OneRohanDesai/telemetry-generator:latest
+            ghcr.io/onerohandesai/telemetry-generator:${{ env.IMAGE_TAG }}
+            ghcr.io/onerohandesai/telemetry-generator:latest
 
       # Receiver
       - name: Build and Push Receiver
@@ -51,8 +53,8 @@ jobs:
           file: docker/receiver/Dockerfile
           push: true
           tags: |
-            ghcr.io/OneRohanDesai/telemetry-receiver:${{ env.IMAGE_TAG }}
-            ghcr.io/OneRohanDesai/telemetry-receiver:latest
+            ghcr.io/onerohandesai/telemetry-receiver:${{ env.IMAGE_TAG }}
+            ghcr.io/onerohandesai/telemetry-receiver:latest
 
       # Dashboard
       - name: Build and Push Dashboard
@@ -62,8 +64,8 @@ jobs:
           file: docker/dashboard/Dockerfile
           push: true
           tags: |
-            ghcr.io/OneRohanDesai/telemetry-dashboard:${{ env.IMAGE_TAG }}
-            ghcr.io/OneRohanDesai/telemetry-dashboard:latest
+            ghcr.io/onerohandesai/telemetry-dashboard:${{ env.IMAGE_TAG }}
+            ghcr.io/onerohandesai/telemetry-dashboard:latest
 
       # Nginx
       - name: Build and Push Nginx
@@ -73,24 +75,24 @@ jobs:
           file: docker/nginx/Dockerfile
           push: true
           tags: |
-            ghcr.io/OneRohanDesai/telemetry-nginx:${{ env.IMAGE_TAG }}
-            ghcr.io/OneRohanDesai/telemetry-nginx:latest
+            ghcr.io/onerohandesai/telemetry-nginx:${{ env.IMAGE_TAG }}
+            ghcr.io/onerohandesai/telemetry-nginx:latest
 
-      # Update Helm Values
-      - name: Update Generator Image
+      # Update Helm Image Tag
+      - name: Update Helm Values
         run: |
-          sed -i "s|tag: .*|tag: ${IMAGE_TAG}|g" helm/telemetry-playground/values-local.yaml
+          sed -i "s/^imageTag:.*/imageTag: ${IMAGE_TAG}/" helm/telemetry-playground/values.yaml
 
       # Commit Updated Helm Values
       - name: Commit Updated Image Tag
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
-          git add helm/telemetry-playground/values-local.yaml
+          git add helm/telemetry-playground/values.yaml
 
           git diff --cached --quiet && exit 0
 
-          git commit -m "Update image tag to ${IMAGE_TAG}"
+          git commit -m "chore: update image tag to ${IMAGE_TAG}"
 
           git push
