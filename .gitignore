@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
 *$py.class
 
 # Virtual Environments
@@ -18,6 +19,7 @@ htmlcov/
 # IDE
 .vscode/
 .idea/
+*.swp
 
 # OS
 .DS_Store

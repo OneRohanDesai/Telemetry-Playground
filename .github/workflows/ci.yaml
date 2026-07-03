@@ -11,8 +11,12 @@ on:
       - main
       - develop
 
+permissions:
+  contents: read
+
 jobs:
-  ci:
+  validate:
+    name: Validate Project
     runs-on: ubuntu-latest
 
     steps:
@@ -31,33 +35,109 @@ jobs:
           pip install ruff pytest
 
       - name: Run Ruff
-        run: |
-          ruff check .
+        run: ruff check .
 
       - name: Run Pytest
-        run: |
-          pytest
+        run: pytest
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Generator
       - name: Build Generator Image
         run: |
           docker build \
             -t telemetry-generator:ci \
             -f docker/generator/Dockerfile .
 
+      - name: Scan Generator Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: telemetry-generator:ci
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Generate Generator SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: telemetry-generator:ci
+          output-file: generator-sbom.spdx.json
+
+      # Receiver
       - name: Build Receiver Image
         run: |
           docker build \
             -t telemetry-receiver:ci \
             -f docker/receiver/Dockerfile .
 
+      - name: Scan Receiver Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: telemetry-receiver:ci
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Generate Receiver SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: telemetry-receiver:ci
+          output-file: receiver-sbom.spdx.json
+
+      # Dashboard
       - name: Build Dashboard Image
         run: |
           docker build \
             -t telemetry-dashboard:ci \
             -f docker/dashboard/Dockerfile .
 
+      - name: Scan Dashboard Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: telemetry-dashboard:ci
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Generate Dashboard SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: telemetry-dashboard:ci
+          output-file: dashboard-sbom.spdx.json
+
+      # Nginx
       - name: Build Nginx Image
         run: |
           docker build \
             -t telemetry-nginx:ci \
             -f docker/nginx/Dockerfile .
+
+      - name: Scan Nginx Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: telemetry-nginx:ci
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Generate Nginx SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: telemetry-nginx:ci
+          output-file: nginx-sbom.spdx.json
+
+      # Upload SBOMs
+      - name: Upload SBOM Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-files
+          path: |
+            generator-sbom.spdx.json
+            receiver-sbom.spdx.json
+            dashboard-sbom.spdx.json
+            nginx-sbom.spdx.json

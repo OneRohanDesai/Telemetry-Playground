@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: onerohandesai
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generator
+      - name: Build and Push Generator
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/generator/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/OneRohanDesai/telemetry-generator:${{ env.IMAGE_TAG }}
+            ghcr.io/OneRohanDesai/telemetry-generator:latest
+
+      # Receiver
+      - name: Build and Push Receiver
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/receiver/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/OneRohanDesai/telemetry-receiver:${{ env.IMAGE_TAG }}
+            ghcr.io/OneRohanDesai/telemetry-receiver:latest
+
+      # Dashboard
+      - name: Build and Push Dashboard
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/dashboard/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/OneRohanDesai/telemetry-dashboard:${{ env.IMAGE_TAG }}
+            ghcr.io/OneRohanDesai/telemetry-dashboard:latest
+
+      # Nginx
+      - name: Build and Push Nginx
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/nginx/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/OneRohanDesai/telemetry-nginx:${{ env.IMAGE_TAG }}
+            ghcr.io/OneRohanDesai/telemetry-nginx:latest
+
+      # Update Helm Values
+      - name: Update Generator Image
+        run: |
+          sed -i "s|tag: .*|tag: ${IMAGE_TAG}|g" helm/telemetry-playground/values-local.yaml
+
+      # Commit Updated Helm Values
+      - name: Commit Updated Image Tag
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git add helm/telemetry-playground/values-local.yaml
+
+          git diff --cached --quiet && exit 0
+
+          git commit -m "Update image tag to ${IMAGE_TAG}"
+
+          git push
