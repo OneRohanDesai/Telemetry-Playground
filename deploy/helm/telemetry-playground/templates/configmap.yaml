@@ -1,17 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
-
 metadata:
   name: telemetry-config
   namespace: telemetry
+  labels:
+    {{- include "telemetry.labels" . | nindent 4 }}
 
 data:
   REDIS_HOST: redis
-
   REDIS_PORT: "6379"
-
   RECEIVER_URL: http://nginx/receive
-
-  OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
-
   LOG_LEVEL: INFO

@@ -1,9 +1,16 @@
 #!/bin/bash
-set -e
 
-echo "Deleting Kind cluster..."
+set -euo pipefail
 
-kind delete cluster -n telemetry-playground
+CLUSTER_NAME="telemetry-playground"
 
-echo ""
-echo "Project stopped."
+echo "Stopping Telemetry Playground..."
+
+if kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
+    kind delete cluster --name "${CLUSTER_NAME}"
+else
+    echo "Cluster not found."
+fi
+
+echo
+echo "Telemetry Playground stopped."

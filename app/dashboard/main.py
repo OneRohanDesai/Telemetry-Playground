@@ -1,3 +1,5 @@
+import os
+
 from app.common.redis_client import set_config
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
@@ -17,6 +19,14 @@ class ConfigRequest(BaseModel):
 def index():
 
     return FileResponse("app/dashboard/static/index.html")
+
+
+@app.get("/generators")
+def generators():
+
+    count = int(os.getenv("GENERATOR_REPLICAS", "3"))
+
+    return [f"generator-{i}" for i in range(1, count + 1)]
 
 
 @app.post("/generator/{name}")

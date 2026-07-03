@@ -1,0 +1,9 @@
+Telemetry Playground installed successfully.
+
+Dashboard:
+
+http://telemetry.local
+
+Release:
+
+{{ .Release.Name }}

@@ -1,0 +1,51 @@
+namespace: telemetry
+
+image:
+  generator: telemetry-generator
+  receiver: telemetry-receiver
+  dashboard: telemetry-dashboard
+  nginx: nginx:alpine
+  redis: redis:7-alpine
+
+imageTag: latest
+
+replicas:
+  generator: 3
+  receiver: 3
+  dashboard: 1
+  nginx: 1
+  redis: 1
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: true
+  host: telemetry.local
+
+config:
+  redisHost: redis
+  redisPort: "6379"
+  receiverUrl: http://nginx/receive
+  otelEndpoint: http://tempo:4318
+  logLevel: INFO
+
+resources:
+  generator:
+    cpu: 100m
+    memory: 128Mi
+  receiver:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+
+  minReplicas: 3
+  maxReplicas: 10
+
+  targetCPUUtilizationPercentage: 60
+
+pdb:
+  enabled: true
+  minAvailable: 2

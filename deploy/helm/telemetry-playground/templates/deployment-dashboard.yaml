@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: dashboard
+
+spec:
+  replicas: {{ .Values.replicas.dashboard }}
+
+  selector:
+    matchLabels:
+      app: dashboard
+
+  template:
+    metadata:
+      labels:
+        app: dashboard
+
+    spec:
+      containers:
+        - name: dashboard
+          image: "{{ .Values.image.dashboard }}:{{ .Values.imageTag }}"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: LOG_LEVEL
+              value: "{{ .Values.config.logLevel }}"
+
+            - name: GENERATOR_REPLICAS
+              value: "{{ .Values.replicas.generator }}"
+
+          ports:
+            - containerPort: 8000

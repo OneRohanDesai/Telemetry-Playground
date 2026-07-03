@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generator
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: generator
+
+spec:
+  replicas: {{ .Values.replicas.generator }}
+
+  selector:
+    matchLabels:
+      app: generator
+
+  template:
+    metadata:
+      labels:
+        app: generator
+
+    spec:
+      containers:
+        - name: generator
+          image: "{{ .Values.image.generator }}:{{ .Values.imageTag }}"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: REDIS_HOST
+              value: "{{ .Values.config.redisHost }}"
+            - name: REDIS_PORT
+              value: "{{ .Values.config.redisPort }}"
+            - name: RECEIVER_URL
+              value: "{{ .Values.config.receiverUrl }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.config.logLevel }}"
+
+          resources:
+            requests:
+              cpu: {{ .Values.resources.generator.cpu }}
+              memory: {{ .Values.resources.generator.memory }}
+            limits:
+              cpu: {{ .Values.resources.generator.cpu }}
+              memory: {{ .Values.resources.generator.memory }}

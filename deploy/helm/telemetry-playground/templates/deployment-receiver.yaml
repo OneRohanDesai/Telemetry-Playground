@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: receiver
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: receiver
+
+spec:
+  replicas: {{ .Values.replicas.receiver }}
+
+  selector:
+    matchLabels:
+      app: receiver
+
+  template:
+    metadata:
+      labels:
+        app: receiver
+
+    spec:
+      containers:
+        - name: receiver
+          image: "{{ .Values.image.receiver }}:{{ .Values.imageTag }}"
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: REDIS_HOST
+              value: "{{ .Values.config.redisHost }}"
+            - name: REDIS_PORT
+              value: "{{ .Values.config.redisPort }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.config.logLevel }}"
+
+          resources:
+            requests:
+              cpu: {{ .Values.resources.receiver.cpu }}
+              memory: {{ .Values.resources.receiver.memory }}
+            limits:
+              cpu: {{ .Values.resources.receiver.cpu }}
+              memory: {{ .Values.resources.receiver.memory }}

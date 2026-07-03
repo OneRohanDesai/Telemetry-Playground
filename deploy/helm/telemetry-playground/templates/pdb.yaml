@@ -1,13 +1,15 @@
+{{- if .Values.pdb.enabled }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 
 metadata:
   name: receiver
-  namespace: telemetry
+  namespace: {{ .Values.namespace }}
 
 spec:
-  minAvailable: 2
+  minAvailable: {{ .Values.pdb.minAvailable }}
 
   selector:
     matchLabels:
       app: receiver
+{{- end }}

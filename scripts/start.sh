@@ -1,49 +1,96 @@
 #!/bin/bash
-set -e
 
-echo "Creating Telemetry Playground cluster..."
+set -euo pipefail
 
-kind create cluster --name telemetry-playground --config kind-config.yaml
+CLUSTER_NAME="telemetry-playground"
 
+echo "========================================"
+echo "Starting Telemetry Playground"
+echo "========================================"
+
+echo
+echo "Checking for existing Kind cluster..."
+
+if kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
+    echo "Existing cluster found. Deleting..."
+    kind delete cluster --name "${CLUSTER_NAME}"
+fi
+
+echo
+echo "Creating Kind cluster..."
+
+kind create cluster \
+    --name "${CLUSTER_NAME}" \
+    --config kind-config.yaml
+
+echo
 echo "Labelling ingress node..."
 
-kubectl label node telemetry-playground-control-plane ingress-ready=true --overwrite
+kubectl label node \
+    "${CLUSTER_NAME}-control-plane" \
+    ingress-ready=true \
+    --overwrite
 
+echo
 echo "Installing ingress-nginx..."
 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/kind/deploy.yaml
+kubectl apply -f \
+https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/kind/deploy.yaml
 
-kubectl rollout status deployment/ingress-nginx-controller \
-  -n ingress-nginx \
-  --timeout=180s
+echo
+echo "Waiting for ingress controller..."
 
-echo "Building images..."
+kubectl rollout status \
+    deployment/ingress-nginx-controller \
+    -n ingress-nginx \
+    --timeout=180s
+
+echo
+echo "Building Docker images..."
 
 docker build -t telemetry-generator:latest -f docker/generator/Dockerfile .
 docker build -t telemetry-receiver:latest -f docker/receiver/Dockerfile .
 docker build -t telemetry-dashboard:latest -f docker/dashboard/Dockerfile .
 docker build -t telemetry-nginx:latest -f docker/nginx/Dockerfile .
 
+echo
 echo "Loading images into Kind..."
 
-kind load docker-image telemetry-generator:latest --name telemetry-playground
-kind load docker-image telemetry-receiver:latest --name telemetry-playground
-kind load docker-image telemetry-dashboard:latest --name telemetry-playground
-kind load docker-image telemetry-nginx:latest --name telemetry-playground
-
-echo "Deploying application..."
-
-kubectl apply -k k8s/overlays/local
-
-kubectl rollout status deployment/redis -n telemetry
-kubectl rollout status deployment/nginx -n telemetry
-kubectl rollout status deployment/receiver -n telemetry
-kubectl rollout status deployment/generator -n telemetry
-kubectl rollout status deployment/dashboard -n telemetry
+kind load docker-image telemetry-generator:latest --name "${CLUSTER_NAME}"
+kind load docker-image telemetry-receiver:latest --name "${CLUSTER_NAME}"
+kind load docker-image telemetry-dashboard:latest --name "${CLUSTER_NAME}"
+kind load docker-image telemetry-nginx:latest --name "${CLUSTER_NAME}"
 
 echo
-echo "Telemetry Playground is ready!"
-echo "Dashboard : http://telemetry.local"
+echo "Deploying Helm release..."
+
+helm upgrade \
+    --install telemetry \
+    deploy/helm/telemetry-playground \
+    --namespace telemetry \
+    --create-namespace \
+    -f deploy/helm/telemetry-playground/values-local.yaml
+
 echo
-echo "Pods:"
+echo "Waiting for workloads..."
+
+kubectl rollout status deployment/redis -n telemetry --timeout=180s
+kubectl rollout status deployment/nginx -n telemetry --timeout=180s
+kubectl rollout status deployment/receiver -n telemetry --timeout=180s
+kubectl rollout status deployment/generator -n telemetry --timeout=180s
+kubectl rollout status deployment/dashboard -n telemetry --timeout=180s
+
+echo
+echo "========================================"
+echo "Telemetry Playground is Ready"
+echo "========================================"
+
+echo
 kubectl get pods -n telemetry
+
+echo
+kubectl get ingress -n telemetry
+
+echo
+echo "Dashboard:"
+echo "http://telemetry.local"
