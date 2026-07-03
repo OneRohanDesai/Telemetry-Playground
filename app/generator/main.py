@@ -3,6 +3,13 @@ import os
 import random
 
 import httpx
+from fastapi import FastAPI, Response
+from opentelemetry.trace import Status, StatusCode
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    generate_latest,
+)
+
 from app.common.metrics import (
     ACTIVE_REQUESTS,
     MALFORMED_PACKETS,
@@ -11,12 +18,6 @@ from app.common.metrics import (
 from app.common.models import create_packet
 from app.common.redis_client import get_config
 from app.common.telemetry import setup_telemetry
-from fastapi import FastAPI, Response
-from opentelemetry.trace import Status, StatusCode
-from prometheus_client import (
-    CONTENT_TYPE_LATEST,
-    generate_latest,
-)
 
 app = FastAPI()
 tracer = setup_telemetry("generator")

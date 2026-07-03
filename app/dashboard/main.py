@@ -1,9 +1,10 @@
 import os
 
-from app.common.redis_client import set_config
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+
+from app.common.redis_client import set_config
 
 app = FastAPI()
 

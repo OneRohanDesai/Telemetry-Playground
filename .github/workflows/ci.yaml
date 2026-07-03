@@ -1,0 +1,63 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff pytest
+
+      - name: Run Ruff
+        run: |
+          ruff check .
+
+      - name: Run Pytest
+        run: |
+          pytest
+
+      - name: Build Generator Image
+        run: |
+          docker build \
+            -t telemetry-generator:ci \
+            -f docker/generator/Dockerfile .
+
+      - name: Build Receiver Image
+        run: |
+          docker build \
+            -t telemetry-receiver:ci \
+            -f docker/receiver/Dockerfile .
+
+      - name: Build Dashboard Image
+        run: |
+          docker build \
+            -t telemetry-dashboard:ci \
+            -f docker/dashboard/Dockerfile .
+
+      - name: Build Nginx Image
+        run: |
+          docker build \
+            -t telemetry-nginx:ci \
+            -f docker/nginx/Dockerfile .

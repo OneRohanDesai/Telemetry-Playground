@@ -1,7 +1,8 @@
-from pydantic import BaseModel
-import uuid
-import time
 import random
+import time
+import uuid
+
+from pydantic import BaseModel
 
 
 class TelemetryPacket(BaseModel):

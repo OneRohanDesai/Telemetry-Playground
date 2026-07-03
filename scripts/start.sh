@@ -3,6 +3,8 @@
 set -euo pipefail
 
 CLUSTER_NAME="telemetry-playground"
+ARGOCD_NAMESPACE="argocd"
+APPLICATION_NAME="telemetry-playground"
 
 echo "========================================"
 echo "Starting Telemetry Playground"
@@ -46,6 +48,25 @@ kubectl rollout status \
     --timeout=180s
 
 echo
+echo "Installing ArgoCD..."
+
+kubectl create namespace "${ARGOCD_NAMESPACE}" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl apply \
+    --server-side \
+    -n "${ARGOCD_NAMESPACE}" \
+    -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+echo
+echo "Waiting for ArgoCD server..."
+
+kubectl rollout status \
+    deployment/argocd-server \
+    -n "${ARGOCD_NAMESPACE}" \
+    --timeout=300s
+
+echo
 echo "Building Docker images..."
 
 docker build -t telemetry-generator:latest -f docker/generator/Dockerfile .
@@ -62,23 +83,30 @@ kind load docker-image telemetry-dashboard:latest --name "${CLUSTER_NAME}"
 kind load docker-image telemetry-nginx:latest --name "${CLUSTER_NAME}"
 
 echo
-echo "Deploying Helm release..."
+echo "Creating ArgoCD Application..."
 
-helm upgrade \
-    --install telemetry \
-    deploy/helm/telemetry-playground \
-    --namespace telemetry \
-    --create-namespace \
-    -f deploy/helm/telemetry-playground/values-local.yaml
+kubectl wait \
+  --for=condition=Established \
+  crd/applications.argoproj.io \
+  --timeout=60s
+
+kubectl apply -f argocd/application.yaml
 
 echo
-echo "Waiting for workloads..."
+echo "Waiting for ArgoCD to synchronize..."
 
-kubectl rollout status deployment/redis -n telemetry --timeout=180s
-kubectl rollout status deployment/nginx -n telemetry --timeout=180s
-kubectl rollout status deployment/receiver -n telemetry --timeout=180s
-kubectl rollout status deployment/generator -n telemetry --timeout=180s
-kubectl rollout status deployment/dashboard -n telemetry --timeout=180s
+kubectl wait \
+  --for=create \
+  application/"${APPLICATION_NAME}" \
+  -n "${ARGOCD_NAMESPACE}" \
+  --timeout=180s
+
+echo
+echo "ArgoCD is running at port 8080"
+
+kubectl port-forward svc/argocd-server \
+-n argocd \
+8080:443
 
 echo
 echo "========================================"

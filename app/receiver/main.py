@@ -3,12 +3,13 @@ import os
 import random
 import time
 
-from app.common.metrics import PACKETS_RECEIVED, REQUEST_LATENCY
-from app.common.models import TelemetryPacket
-from app.common.telemetry import setup_telemetry
 from fastapi import FastAPI, Response
 from opentelemetry.trace import Status, StatusCode
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
+from app.common.metrics import PACKETS_RECEIVED, REQUEST_LATENCY
+from app.common.models import TelemetryPacket
+from app.common.telemetry import setup_telemetry
 
 app = FastAPI()
 tracer = setup_telemetry("receiver")
