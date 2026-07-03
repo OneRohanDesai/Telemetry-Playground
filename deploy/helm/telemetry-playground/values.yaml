@@ -7,7 +7,7 @@ image:
   nginx: ghcr.io/onerohandesai/telemetry-nginx
   redis: redis:7-alpine
 
-imageTag: 270ee3b4e895b31ae6db602af226f41ddb330209
+imageTag: 790381226c7f32655d8960b0fb96ba7b3d68c1fe
 
 replicas:
   generator: 3
