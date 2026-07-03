@@ -51,11 +51,11 @@ jobs:
             -f docker/generator/Dockerfile .
 
       - name: Scan Generator Image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: telemetry-generator:ci
           format: table
-          exit-code: "1"
+          exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
@@ -73,11 +73,11 @@ jobs:
             -f docker/receiver/Dockerfile .
 
       - name: Scan Receiver Image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: telemetry-receiver:ci
           format: table
-          exit-code: "1"
+          exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
@@ -95,11 +95,11 @@ jobs:
             -f docker/dashboard/Dockerfile .
 
       - name: Scan Dashboard Image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: telemetry-dashboard:ci
           format: table
-          exit-code: "1"
+          exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
@@ -117,11 +117,11 @@ jobs:
             -f docker/nginx/Dockerfile .
 
       - name: Scan Nginx Image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: telemetry-nginx:ci
           format: table
-          exit-code: "1"
+          exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
