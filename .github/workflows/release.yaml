@@ -34,7 +34,7 @@ jobs:
 
       # Generator
       - name: Build and Push Generator
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/generator/Dockerfile
@@ -45,7 +45,7 @@ jobs:
 
       # Receiver
       - name: Build and Push Receiver
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/receiver/Dockerfile
@@ -56,7 +56,7 @@ jobs:
 
       # Dashboard
       - name: Build and Push Dashboard
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/dashboard/Dockerfile
@@ -67,7 +67,7 @@ jobs:
 
       # Nginx
       - name: Build and Push Nginx
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/nginx/Dockerfile
