@@ -87,7 +87,7 @@ jobs:
           image: telemetry-receiver:ci
           output-file: receiver-sbom.spdx.json
 
-      # Dashboard
+      # dashboard
       - name: Build Dashboard Image
         run: |
           docker build \
