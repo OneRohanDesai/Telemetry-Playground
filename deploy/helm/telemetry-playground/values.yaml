@@ -10,8 +10,8 @@ image:
 imageTag: latest
 
 replicas:
-  generator: 3
-  receiver: 3
+  generator: 5
+  receiver: 5
   dashboard: 1
   nginx: 1
   redis: 1
