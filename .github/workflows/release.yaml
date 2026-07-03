@@ -89,7 +89,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git add helm/telemetry-playground/values.yaml
+          git add deploy/helm/telemetry-playground/values.yaml
 
           git diff --cached --quiet && exit 0
 
