@@ -81,7 +81,7 @@ jobs:
       # Update Helm Image Tag
       - name: Update Helm Values
         run: |
-          sed -i "s/^imageTag:.*/imageTag: ${IMAGE_TAG}/" helm/telemetry-playground/values.yaml
+          sed -i "s/^imageTag:.*/imageTag: ${IMAGE_TAG}/" deploy/helm/telemetry-playground/values.yaml
 
       # Commit Updated Helm Values
       - name: Commit Updated Image Tag
