@@ -1,6 +1,6 @@
 replicas:
-  generator: 7
-  receiver: 7
+  generator: 10
+  receiver: 10
   dashboard: 1
 
 autoscaling:
