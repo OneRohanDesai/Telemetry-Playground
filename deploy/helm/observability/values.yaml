@@ -2,8 +2,8 @@ namespace: observability
 
 prometheus:
   image: prom/prometheus
-  tag: v3.5.0
   replicas: 1
+  tag: v3.5.0
 
 grafana:
   image: grafana/grafana:12.0.2
