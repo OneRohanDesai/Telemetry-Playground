@@ -2,11 +2,13 @@ namespace: observability
 
 prometheus:
   image: prom/prometheus
-  replicas: 1
   tag: v3.5.0
+  replicas: 1
 
 grafana:
-  image: grafana/grafana:12.0.2
+  image:
+    repository: grafana/grafana
+    tag: "12.0.2"
   replicas: 1
   adminUser: admin
   adminPassword: admin

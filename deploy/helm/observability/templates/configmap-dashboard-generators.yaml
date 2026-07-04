@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 
 metadata:
-  name: grafana-dashboard-generator
+  name: grafana-dashboard-generators
 
   labels:
     grafana_dashboard: "1"
