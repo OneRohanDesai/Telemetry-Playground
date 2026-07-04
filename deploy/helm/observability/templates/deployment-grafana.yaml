@@ -40,8 +40,12 @@ spec:
               mountPath: /etc/grafana/provisioning/datasources
 
             # Dashboard provider
-            - name: dashboard-provider
+            - name: providers
               mountPath: /etc/grafana/provisioning/dashboards
+
+            # Dashboard provider
+            - name: dashboards
+              mountPath: /var/lib/grafana/dashboards
 
             # Dashboards
             - name: dashboard-overview
@@ -86,9 +90,14 @@ spec:
             name: grafana-datasources
 
         # Dashboard provider provisioning
-        - name: dashboard-provider
+        - name: providers
           configMap:
             name: grafana-dashboard-provider
+
+        # Dashboard provider provisioning
+        - name: dashboards
+          configMap:
+            name: grafana-dashboards
 
         # Dashboard JSON ConfigMaps
         - name: dashboard-overview

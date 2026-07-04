@@ -14,9 +14,16 @@ grafana:
   adminPassword: admin
 
 loki:
-  image: grafana/loki
-  tag: 3.5.2
+  image: grafana/loki:3.5.2
+
   replicas: 1
+
+  service:
+    port: 3100
+
+  resources:
+    cpu: 200m
+    memory: 256Mi
 
 promtail:
   image: grafana/promtail
