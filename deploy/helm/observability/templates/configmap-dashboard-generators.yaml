@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: grafana-dashboard-generator
+
+  labels:
+    grafana_dashboard: "1"
+
+data:
+  telemetry-overview.json: |
+{{ .Files.Get "observability/grafana/dashboards/generators.json" | indent 4 }}
