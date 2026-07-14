@@ -18,6 +18,8 @@ spec:
         app: prometheus
 
     spec:
+      serviceAccountName: prometheus
+
       containers:
         - name: prometheus
 

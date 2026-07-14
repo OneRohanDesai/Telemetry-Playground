@@ -10,18 +10,29 @@ scrape_configs:
     relabel_configs:
       - source_labels:
           - __meta_kubernetes_namespace
-        regex: telemetry
         action: keep
+        regex: telemetry
 
       - source_labels:
           - __meta_kubernetes_pod_label_app
-        regex: generator
         action: keep
+        regex: generator
 
       - source_labels:
-          - __meta_kubernetes_pod_ip
-        target_label: __address__
-        replacement: $1:8000
+          - __meta_kubernetes_pod_container_port_number
+        action: keep
+        regex: "8000"
+
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+
+      - source_labels:
+          - __meta_kubernetes_namespace
+        target_label: namespace
+
+      - source_labels:
+          - __meta_kubernetes_pod_name
+        target_label: pod
 
   - job_name: receivers
 
@@ -31,15 +42,26 @@ scrape_configs:
     relabel_configs:
       - source_labels:
           - __meta_kubernetes_namespace
-        regex: telemetry
         action: keep
+        regex: telemetry
 
       - source_labels:
           - __meta_kubernetes_pod_label_app
-        regex: receiver
         action: keep
+        regex: receiver
 
       - source_labels:
-          - __meta_kubernetes_pod_ip
-        target_label: __address__
-        replacement: $1:8000
+          - __meta_kubernetes_pod_container_port_number
+        action: keep
+        regex: "8000"
+
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+
+      - source_labels:
+          - __meta_kubernetes_namespace
+        target_label: namespace
+
+      - source_labels:
+          - __meta_kubernetes_pod_name
+        target_label: pod
