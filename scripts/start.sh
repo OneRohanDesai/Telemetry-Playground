@@ -91,6 +91,7 @@ kubectl wait \
   --timeout=60s
 
 kubectl apply -f argocd/application.yaml
+kubectl apply -f argocd/observability-application.yaml
 
 echo
 echo "Waiting for ArgoCD to synchronize..."
@@ -106,7 +107,7 @@ echo "ArgoCD is running at port 8080"
 
 kubectl port-forward svc/argocd-server \
 -n argocd \
-8080:443
+8080:443 &&
 
 kubectl \
 -n argocd \

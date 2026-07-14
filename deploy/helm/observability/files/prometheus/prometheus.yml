@@ -4,16 +4,42 @@ global:
 scrape_configs:
   - job_name: generators
 
-    static_configs:
-      - targets:
-          - generator-1:8000
-          - generator-2:8000
-          - generator-3:8000
+    kubernetes_sd_configs:
+      - role: pod
+
+    relabel_configs:
+      - source_labels:
+          - __meta_kubernetes_namespace
+        regex: telemetry
+        action: keep
+
+      - source_labels:
+          - __meta_kubernetes_pod_label_app
+        regex: generator
+        action: keep
+
+      - source_labels:
+          - __meta_kubernetes_pod_ip
+        target_label: __address__
+        replacement: $1:8000
 
   - job_name: receivers
 
-    static_configs:
-      - targets:
-          - receiver-1:8000
-          - receiver-2:8000
-          - receiver-3:8000
+    kubernetes_sd_configs:
+      - role: pod
+
+    relabel_configs:
+      - source_labels:
+          - __meta_kubernetes_namespace
+        regex: telemetry
+        action: keep
+
+      - source_labels:
+          - __meta_kubernetes_pod_label_app
+        regex: receiver
+        action: keep
+
+      - source_labels:
+          - __meta_kubernetes_pod_ip
+        target_label: __address__
+        replacement: $1:8000
