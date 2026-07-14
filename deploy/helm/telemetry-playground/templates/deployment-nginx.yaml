@@ -28,6 +28,11 @@ spec:
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
 
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+
       volumes:
         - name: nginx-config
           configMap:

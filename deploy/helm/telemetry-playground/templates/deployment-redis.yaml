@@ -23,4 +23,6 @@ spec:
         - name: redis
           image: {{ .Values.image.redis }}
           ports:
-            - containerPort: 6379
+            - name: http
+              containerPort: 6379
+              protocol: TCP

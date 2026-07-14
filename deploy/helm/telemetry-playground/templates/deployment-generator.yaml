@@ -41,3 +41,8 @@ spec:
             limits:
               cpu: {{ .Values.resources.generator.cpu }}
               memory: {{ .Values.resources.generator.memory }}
+
+            ports:
+              - name: http
+                containerPort: 8000
+                protocol: TCP
