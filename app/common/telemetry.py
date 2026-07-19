@@ -1,3 +1,5 @@
+import os
+
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
@@ -16,7 +18,7 @@ def setup_telemetry(service_name: str):
     provider = TracerProvider(resource=resource)
 
     exporter = OTLPSpanExporter(
-        endpoint="http://tempo:4317",
+        endpoint="otel-collector.observability.svc.cluster.local:4317",
         insecure=True,
     )
 
@@ -24,4 +26,13 @@ def setup_telemetry(service_name: str):
 
     trace.set_tracer_provider(provider)
 
-    return trace.get_tracer(service_name)
+    return trace.get_tracer(os.getenv("OTEL_SERVICE_NAME", service_name))
+
+
+exporter = OTLPSpanExporter(
+    endpoint=os.getenv(
+        "OTEL_EXPORTER_OTLP_ENDPOINT",
+        "http://otel-collector.observability.svc.cluster.local:4317",
+    ),
+    insecure=True,
+)

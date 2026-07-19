@@ -33,6 +33,14 @@ spec:
               value: "{{ .Values.config.receiverUrl }}"
             - name: LOG_LEVEL
               value: "{{ .Values.config.logLevel }}"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.observability.svc.cluster.local:4317
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+            - name: OTEL_SERVICE_NAME
+              value: generator
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.namespace=telemetry
 
           resources:
             requests:

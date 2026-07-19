@@ -31,6 +31,18 @@ spec:
             - name: GENERATOR_REPLICAS
               value: "{{ .Values.replicas.generator }}"
 
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.observability.svc.cluster.local:4317
+
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+
+            - name: OTEL_SERVICE_NAME
+              value: dashboard
+
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.namespace=telemetry
+
           ports:
             - name: http
               containerPort: 8000

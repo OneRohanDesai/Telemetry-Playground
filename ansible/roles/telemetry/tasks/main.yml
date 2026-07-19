@@ -1,0 +1,7 @@
+- name: Deploy Telemetry Playground
+  shell: |
+    helm upgrade \
+    --install telemetry-playground \
+    deploy/helm/telemetry-playground \
+    -n telemetry \
+    --create-namespace

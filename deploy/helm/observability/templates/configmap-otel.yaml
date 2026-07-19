@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: otel-collector-config
+  namespace: {{ .Values.namespace }}
+
+data:
+
+  collector.yml: |
+{{ .Files.Get "files/otel/collector.yml" | indent 4 }}

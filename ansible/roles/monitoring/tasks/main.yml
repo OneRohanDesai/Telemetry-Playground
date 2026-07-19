@@ -1,0 +1,42 @@
+- name: Create observability namespace
+  command: kubectl create namespace observability --dry-run=client -o yaml
+  register: obs
+
+- name: Apply namespace
+  shell: echo '{{ obs.stdout }}' | kubectl apply -f -
+
+- name: Install observability chart
+  command: >
+    helm upgrade --install observability
+    ./deploy/helm/observability
+    -n observability
+
+- name: Wait for Grafana
+  command: >
+    kubectl rollout status deployment/grafana
+    -n observability
+    --timeout=300s
+
+- name: Wait for Prometheus
+  command: >
+    kubectl rollout status deployment/prometheus
+    -n observability
+    --timeout=300s
+
+- name: Wait for Loki
+  command: >
+    kubectl rollout status deployment/loki
+    -n observability
+    --timeout=300s
+
+- name: Wait for Tempo
+  command: >
+    kubectl rollout status deployment/tempo
+    -n observability
+    --timeout=300s
+
+- name: Wait for OTEL Collector
+  command: >
+    kubectl rollout status deployment/otel-collector
+    -n observability
+    --timeout=300s

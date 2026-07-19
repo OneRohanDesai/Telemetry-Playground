@@ -7,4 +7,4 @@ metadata:
 
 data:
   datasources.yaml: |
-{{ .Files.Get "observability/grafana/provisioning/datasources/datasources.yaml" | indent 4 }}
+{{ .Files.Get "files/grafana/datasources/datasources.yaml" | indent 4 }}

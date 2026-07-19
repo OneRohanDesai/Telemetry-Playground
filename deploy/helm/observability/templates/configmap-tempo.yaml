@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: tempo-config
+  namespace: {{ .Values.namespace }}
+
+data:
+  tempo.yml: |
+{{ .Files.Get "files/tempo/tempo.yml" | indent 4 }}
