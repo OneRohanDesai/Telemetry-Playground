@@ -139,7 +139,7 @@ This repository serves as a personal platform engineering playground for experim
 * DevSecOps
 * Platform automation
 
-The application layer is intentionally kept small and mostly unchanged. The surrounding platform continuously evolves.
+The application layer is intentionally kept small and unchanged most of the time. The surrounding platform continuously evolves.
 
 ---
 
